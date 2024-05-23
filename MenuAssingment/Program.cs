@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace MenuAssingment {
     internal class Program {
@@ -76,8 +77,12 @@ namespace MenuAssingment {
 
             if (parsedResultAge != -1) {
 
-                if (parsedResultAge < 20) {
+                if (parsedResultAge < 5) {
+                    Console.WriteLine("Barn under 5 år går gratis");
+                } else if (parsedResultAge < 20) {
                     Console.WriteLine("Ungdomspris: {0}kr", YoungCustomerMovieTicketPrice);
+                } else if (parsedResultAge > 100) {
+                    Console.WriteLine("Pensionärer över 100 går gratis");
                 } else if (parsedResultAge > 64) {
                     Console.WriteLine("Pensionärspris: {0}kr", OldCustomerMovieTicketPrice);
                 } else {
@@ -103,6 +108,7 @@ namespace MenuAssingment {
                 int youngCustomers = 0;
                 int oldCustomers = 0;
                 int standardCustomers = 0;
+                int freebieCustomers = 0;
 
                 for (int i = 0; i < parsedResultGroupCount; i++) {
                     Console.WriteLine("Ange ålder på person {0}:", i + 1);
@@ -111,7 +117,9 @@ namespace MenuAssingment {
 
                     if (parsedResultAge != -1) {
 
-                        if (parsedResultAge < 20) {
+                        if (parsedResultAge < 5 || parsedResultAge > 100) {
+                            freebieCustomers++;
+                        } else if (parsedResultAge < 20) {
                             youngCustomers++;
                         } else if (parsedResultAge > 64) {
                             oldCustomers++;
@@ -124,7 +132,14 @@ namespace MenuAssingment {
                     }
                 }
 
-                Console.WriteLine("Totalkostnad för hela sällskapet på {0} personer: {1}kr", parsedResultGroupCount, CalculateGroupPrice(youngCustomers, oldCustomers, standardCustomers));
+                if (freebieCustomers > 0) {
+                    Console.WriteLine("Totalkostnad för hela sällskapet på {0} personer: {1}kr", parsedResultGroupCount, CalculateGroupPrice(youngCustomers, oldCustomers, standardCustomers));
+                    Console.WriteLine("Där {0} får gå gratis", freebieCustomers);
+
+                } else {
+                    Console.WriteLine("Totalkostnad för hela sällskapet på {0} personer: {1}kr", parsedResultGroupCount, CalculateGroupPrice(youngCustomers, oldCustomers, standardCustomers));
+                }
+
             } else {
                 Console.WriteLine("Inget antal över 0 inskrivet, återvänder till huvudmenyn.");
             }
@@ -175,7 +190,8 @@ namespace MenuAssingment {
             string? readLine = Console.ReadLine();
 
             if (!string.IsNullOrEmpty(readLine)) {
-
+                
+                readLine = RemoveExtraSpaces(readLine);
                 var sentenceList = readLine.Split(" ");
 
                 if (sentenceList.Length < 3) {
@@ -188,6 +204,34 @@ namespace MenuAssingment {
                 Console.WriteLine("Ogiltig inmatning, återvänder till huvudmenyn.");
             }
             Console.WriteLine("");
+        }
+
+
+        /// <summary>
+        /// Removes extra spaces before and between other characters in a string. 
+        /// </summary>
+        /// <param name="inputString">The string to clean up.</param>
+        /// <returns>The cleaned up string.</returns>
+        /// <remarks>
+        /// Does NOT handle tabs or newlines.
+        /// </remarks>
+
+        private static string RemoveExtraSpaces(string inputString) {
+            inputString = inputString.Trim();
+            int nextIndex;
+
+            for (int i = 0; i < inputString.Length; i++) {
+
+                nextIndex = i + 1;
+
+                if (nextIndex != inputString.Length) {
+                    if (inputString[i].Equals(' ') && inputString[nextIndex].Equals(' ')) {
+                        inputString = inputString.Remove(i, 1);
+                        i--;
+                    }
+                }
+            }
+            return inputString;
         }
     }
 }
